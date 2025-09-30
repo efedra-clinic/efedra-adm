@@ -8,7 +8,7 @@ export const doctor = defineType({
     defineField({
       name: 'name',
       title: 'Імʼя',
-      type: 'string',
+      type: 'multilangString',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -23,7 +23,7 @@ export const doctor = defineType({
     defineField({
       name: 'position',
       title: 'Посада',
-      type: 'string',
+      type: 'multilangString',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -49,8 +49,7 @@ export const doctor = defineType({
     defineField({
       name: 'description',
       title: 'Короткий опис',
-      type: 'text',
-      rows: 3,
+      type: 'multilangText',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -60,4 +59,19 @@ export const doctor = defineType({
       validation: (Rule) => Rule.required().min(1).error('Вкажіть порядок від 1 і вище'),
     }),
   ],
+
+  preview: {
+    select: {
+      title: 'name.uk',
+      subtitle: 'position.uk',
+      media: 'photo',
+    },
+    prepare({title, subtitle, media}) {
+      return {
+        title,
+        subtitle,
+        media,
+      }
+    },
+  },
 })
