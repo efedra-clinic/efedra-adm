@@ -8,7 +8,7 @@ export const post = defineType({
     defineField({
       name: 'title',
       title: 'Назва',
-      type: 'string',
+      type: 'multilangString',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -16,7 +16,7 @@ export const post = defineType({
       title: 'Slug',
       type: 'slug',
       options: {
-        source: 'title',
+        source: 'title.uk',
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
@@ -46,31 +46,20 @@ export const post = defineType({
     defineField({
       name: 'description',
       title: 'Короткий опис',
-      type: 'text',
-      rows: 3,
+      type: 'multilangText',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'content',
       title: 'Основний текст',
-      type: 'array',
-      of: [
-        {
-          type: 'block',
-          styles: [{title: 'Normal', value: 'normal'}],
-          marks: {
-            decorators: [{title: 'Bold', value: 'strong'}],
-            annotations: [],
-          },
-        },
-      ],
+      type: 'multilangBlock',
       validation: (Rule) => Rule.required(),
     }),
   ],
 
   preview: {
     select: {
-      title: 'title',
+      title: 'title.uk',
       media: 'image',
       subtitle: 'direction',
     },

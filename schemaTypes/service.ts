@@ -20,7 +20,7 @@ export default defineType({
     defineField({
       name: 'title',
       title: 'Назва послуги',
-      type: 'string',
+      type: 'multilangString',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -48,7 +48,7 @@ export default defineType({
       title: 'Короткий опис',
       description:
         'Короткий опис послуги, який відображається в картці товару на сторінках послуг Стоматологія та Естетична медицина',
-      type: 'text',
+      type: 'multilangText',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -57,7 +57,7 @@ export default defineType({
       description: 'Унікальна частина посилання, формується на основі назви послуги',
       type: 'slug',
       options: {
-        source: 'title',
+        source: 'title.uk',
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
@@ -69,20 +69,60 @@ export default defineType({
       title: 'Опис процедури',
       type: 'object',
       fields: [
-        {name: 'text', title: 'Короткий опис', type: 'text', validation: (Rule) => Rule.required()},
+        {
+          name: 'text',
+          title: 'Короткий опис',
+          type: 'multilangText',
+          validation: (Rule) =>
+            Rule.custom((text: any, context) => {
+              const parent = context.parent as any
+              const hasAnyField =
+                parent?.images?.length > 0 || parent?.info?.length > 0 || text?.uk || text?.ru
+
+              if (hasAnyField && (!text?.uk || !text?.ru)) {
+                return "Якщо заповнено хоча б одне поле розділу, то всі поля обов'язкові для обох мов"
+              }
+              return true
+            }),
+        },
         {
           name: 'images',
           title: 'Три картинки',
           type: 'array',
           of: [{type: 'image', options: {hotspot: true}}],
-          validation: (Rule) => Rule.min(3).max(3).required(),
+          validation: (Rule) =>
+            Rule.custom((images: any, context) => {
+              const parent = context.parent as any
+              const hasAnyField = parent?.text?.uk || parent?.text?.ru || parent?.info?.length > 0
+
+              if (hasAnyField) {
+                if (!images || images.length === 0) {
+                  return "Якщо заповнено хоча б одне поле розділу, то всі поля обов'язкові"
+                }
+                if (images.length !== 3) {
+                  return 'Має бути рівно 3 картинки'
+                }
+              }
+              return true
+            }),
         },
         {
           name: 'info',
           title: 'Інформація про процедуру',
           type: 'array',
-          of: [{type: 'string'}],
-          validation: (Rule) => Rule.min(1).required(),
+          of: [{type: 'multilangString'}],
+          validation: (Rule) =>
+            Rule.custom((info: any, context) => {
+              const parent = context.parent as any
+              const hasAnyField = parent?.text?.uk || parent?.text?.ru || parent?.images?.length > 0
+
+              if (hasAnyField) {
+                if (!info || info.length === 0) {
+                  return "Якщо заповнено хоча б одне поле розділу, то всі поля обов'язкові"
+                }
+              }
+              return true
+            }),
         },
       ],
     }),
@@ -107,7 +147,7 @@ export default defineType({
             {
               name: 'text',
               title: 'Короткий рядок',
-              type: 'string',
+              type: 'multilangString',
               validation: (Rule) => Rule.required(),
             },
           ],
@@ -150,13 +190,13 @@ export default defineType({
                 {
                   name: 'title',
                   title: 'Назва',
-                  type: 'string',
+                  type: 'multilangString',
                   validation: (Rule) => Rule.required(),
                 },
                 {
                   name: 'description',
                   title: 'Короткий опис',
-                  type: 'text',
+                  type: 'multilangText',
                   validation: (Rule) => Rule.required(),
                 },
               ],
@@ -186,13 +226,13 @@ export default defineType({
             {
               name: 'title',
               title: 'Назва',
-              type: 'string',
+              type: 'multilangString',
               validation: (Rule) => Rule.required(),
             },
             {
               name: 'text',
               title: 'Короткий текст',
-              type: 'text',
+              type: 'multilangText',
               validation: (Rule) => Rule.required(),
             },
           ],
@@ -221,22 +261,45 @@ export default defineType({
           title: 'Картинка',
           type: 'image',
           options: {hotspot: true},
-          validation: (Rule) => Rule.required(),
+          validation: (Rule) =>
+            Rule.custom((image, context) => {
+              const parent = context.parent as any
+              const hasAnyField = parent?.items?.length > 0
+
+              if (hasAnyField && !image) {
+                return "Якщо заповнено хоча б одне поле розділу, то всі поля обов'язкові"
+              }
+              return true
+            }),
         },
         {
           name: 'items',
           title: 'Список',
           type: 'array',
-          of: [{type: 'string'}],
+          of: [{type: 'multilangString'}],
           validation: (Rule) =>
-            Rule.required()
-              .min(2)
-              .custom((items: string[]) => {
+            Rule.custom((items: any[], context) => {
+              const parent = context.parent as any
+              const hasAnyField = parent?.image
+
+              if (hasAnyField) {
+                if (!items || items.length === 0) {
+                  return "Якщо заповнено хоча б одне поле розділу, то всі поля обов'язкові"
+                }
+                if (items.length < 2) {
+                  return 'Мінімум 2 елементи'
+                }
                 if (items.length % 2 !== 0) {
                   return 'Кількість елементів має бути парною'
                 }
-                return true
-              }),
+                // Перевіряємо, що всі елементи мають обидві мови
+                const incompleteItems = items.filter((item: any) => !item?.uk || !item?.ru)
+                if (incompleteItems.length > 0) {
+                  return 'Всі елементи повинні бути заповнені для обох мов'
+                }
+              }
+              return true
+            }),
         },
       ],
     }),
@@ -252,7 +315,7 @@ export default defineType({
           name: 'title',
           title: 'Заголовок секції',
           description: 'Наприклад - Види аугментації.',
-          type: 'string',
+          type: 'multilangString',
           validation: (Rule) => Rule.required(),
         },
         {
@@ -273,20 +336,20 @@ export default defineType({
                 {
                   name: 'title',
                   title: 'Заголовок',
-                  type: 'string',
+                  type: 'multilangString',
                   validation: (Rule) => Rule.required(),
                 },
                 {
                   name: 'text',
                   title: 'Короткий текст',
-                  type: 'text',
+                  type: 'multilangText',
                   validation: (Rule) => Rule.required(),
                 },
                 {
                   name: 'details',
                   title: 'Список деталей',
                   type: 'array',
-                  of: [{type: 'string'}],
+                  of: [{type: 'multilangString'}],
                 },
               ],
             },
@@ -299,7 +362,7 @@ export default defineType({
 
   preview: {
     select: {
-      title: 'title',
+      title: 'title.uk',
       subtitle: 'category',
       media: 'mainImage',
     },

@@ -8,7 +8,7 @@ export const priceCategory = defineType({
     defineField({
       name: 'title',
       title: 'Назва категорії',
-      type: 'string',
+      type: 'multilangString',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -38,7 +38,7 @@ export const priceCategory = defineType({
             defineField({
               name: 'title',
               title: 'Назва підкатегорії',
-              type: 'string',
+              type: 'multilangString',
               validation: (Rule) => Rule.required(),
             }),
             defineField({
@@ -54,7 +54,7 @@ export const priceCategory = defineType({
                     defineField({
                       name: 'title',
                       title: 'Назва послуги',
-                      type: 'string',
+                      type: 'multilangString',
                       validation: (Rule) => Rule.required(),
                     }),
                     defineField({
@@ -67,7 +67,7 @@ export const priceCategory = defineType({
                     defineField({
                       name: 'duration',
                       title: 'Тривалість процедури',
-                      type: 'string',
+                      type: 'multilangString',
                       description: 'Наприклад: 30 хвилин',
                     }),
                   ],
@@ -81,7 +81,7 @@ export const priceCategory = defineType({
   ],
   preview: {
     select: {
-      title: 'title',
+      title: 'title.uk',
     },
     prepare(selection) {
       const {title} = selection
