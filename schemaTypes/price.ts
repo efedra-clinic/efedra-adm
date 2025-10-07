@@ -12,6 +12,11 @@ export const priceCategory = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'order',
+      title: 'Порядок відображення на сайті',
+      type: 'number',
+    }),
+    defineField({
       name: 'colorScheme',
       title: 'Кольорова схема',
       type: 'string',
