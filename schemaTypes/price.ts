@@ -76,10 +76,32 @@ export const priceCategory = defineType({
                       description: 'Наприклад: 30 хвилин',
                     }),
                   ],
+                  preview: {
+                    select: {
+                      title: 'title.uk',
+                    },
+                    prepare(selection) {
+                      const {title} = selection
+                      return {
+                        title,
+                      }
+                    },
+                  },
                 }),
               ],
             }),
           ],
+          preview: {
+            select: {
+              title: 'title.uk',
+            },
+            prepare(selection) {
+              const {title} = selection
+              return {
+                title,
+              }
+            },
+          },
         }),
       ],
     }),
